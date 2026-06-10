@@ -29,8 +29,8 @@
 
 | | 내용 |
 |---|------|
-| **Role** | 부분 마방진을 풀며 격자를 수정하는 **학습자** — 그리고 신뢰 경계를 코드로 고정하는 **TDD 개발자** |
-| **Goal** | `original`(문제에서 주어진 격자)과 `working`(작업 중 격자)을 비교해, **지금 이 상태에서 검증을 계속해도 되는지** `trusted` / `contaminated` 로 판정한다. |
+| **Role** | 4×4 부분 마방진 **풀이 성공**을 목표로 격자를 채우는 **학습자** — 풀이·검증 경계를 코드로 고정하는 **TDD 개발자** |
+| **Goal** | **최종:** 빈칸 2개를 올바르게 채워 **10선 합 34 풀이 성공**(완성 격자)에 도달한다. **세션 3:** 그 과정의 첫 관문으로 `original`(주어진 격자)과 `working`(작업 중 격자)을 비교해, **지금 이 상태에서 풀이·검증을 이어갈 수 있는지** `trusted` / `contaminated`로 판정한다. |
 | **Input** | `original: list[list[int]]` — 빈칸 `0`, 고정값 `1~16` · `working: list[list[int]]` — 학습자가 채운 작업 격자 |
 | **Output** | `status`: `"trusted"` \| `"contaminated"` · `can_verify`: bool — `True`일 때만 이후 검증(10선 등) 진행 · `violations`: `[{ "rule_id", "row", "col", "original", "working" }]` |
 

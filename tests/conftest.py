@@ -15,3 +15,9 @@ GRID_G1_ORIGINAL: list[list[int]] = [
 def grid_g1_original() -> list[list[int]]:
     """문제에서 주어진 G1 격자 — 빈칸 2개."""
     return [row[:] for row in GRID_G1_ORIGINAL]
+
+
+@pytest.fixture
+def grid_g1() -> list[list[int]]:
+    """G1 격자 — 빈칸 2개, row-major (grid_g1_original 동일 데이터)."""
+    return [row[:] for row in GRID_G1_ORIGINAL]
