@@ -1,0 +1,58 @@
+# MagicSquare_XX — Project Rules (SSOT)
+
+## 도메인
+- 4×4 **부분** 마방진: 빈칸 `0`, 채워진 칸 `1~16`, 빈칸 정확히 2개
+- 마법 상수: **34** (세션 3 범위 밖 — 10선 검증은 후속)
+- 격자 인덱스: `grid[row][col]`, row·col 모두 0~3
+
+## 핵심 API (세션 3)
+```python
+def assess_partial_trust(
+    original: list[list[int]],
+    working: list[list[int]],
+) -> dict
+```
+- `original`: 문제에서 **주어진** 격자 (빈칸 `0`, 고정값 `1~16`)
+- `working`: 학습자 **작업 중** 격자
+- 출력:
+  - `status`: `"trusted"` | `"contaminated"`
+  - `can_verify`: bool — `True`면 이후 검증(10선 등) 진행 가능
+  - `violations`: `[{ "rule_id", "row", "col", "original", "working" }]`
+
+## 신뢰 Rule (R1~R4)
+| ID | Rule | 위반 조건 |
+|----|------|-----------|
+| R1 | `original`에서 `≠0`인 칸은 `working`에서 **동일**해야 함 | 값 불일치 |
+| R2 | `original`에서 `0`인 칸만 `working`에서 `0` 또는 `1~16`으로 변경 가능 | (R1과 함께 판정) |
+| R3 | `working` 값이 `0` 또는 `1~16` 범위 밖이면 오염 | 범위 위반 |
+| R4 | R1·R3 위반 시 → `status="contaminated"`, `can_verify=False`, `violations`에 **전부** 기록 | 누락 금지 |
+| — | R1~R3 모두 통과 → `status="trusted"`, `can_verify=True`, `violations=[]` | |
+
+## TDD (RED → GREEN → REFACTOR)
+- **RED**: 실패 테스트 먼저. `tests/`만 수정, `src/` GREEN 구현 선행 금지
+- **GREEN**: 테스트 통과에 필요한 **최소** 구현만 `src/`에 추가
+- **REFACTOR**: 동작 유지, Change Budget: 파일≤3
+- 금지: assert 완화, `pytest.skip`, `xfail`, 기대값 변경으로 강제 통과
+- RED 확인: `pytest` → 반드시 FAIL. PASS면 RED 무효
+
+## AI 행동
+- 모든 응답: **한국어**
+- TDD 작업 시 응답 **첫 줄**에 Phase 선언:
+  `Phase: red | API: assess_partial_trust | Scope: tests/ only`
+- git commit·push: 사용자가 **명시적으로 요청할 때만**
+
+## 범위 밖 (표면 문제 — 승인 없이 추가 금지)
+- Cell `state` 필드, 주어진/추론 **UI** 구분
+- 백트래킹·리셋 프로그램, Solver, PyQt UI, BCE 전체
+- 실패 설명 슬라이드, `validate_lines`(10선 — 후속 GREEN)
+
+## 프로젝트 구조
+```
+src/assess_partial_trust.py
+tests/test_assess_partial_trust.py
+tests/conftest.py
+pyproject.toml
+.cursor/commands/
+.cursor/skills/magic-square-tdd/
+report/
+```
