@@ -144,6 +144,48 @@ prompts/                    # 세션 프롬프트
 
 ---
 
+## Test ID
+
+PRD §7·§9 기준. **1 Test ID : 1 테스트 함수** (C2C Rule 2).
+
+### `assess_partial_trust` — T-TRUST
+
+| Test ID | FR | 상태 | 테스트 함수 (예정) | Given → Then |
+|---------|-----|------|-------------------|--------------|
+| **T-TRUST-01** | FR-TRUST-05 | RED (존재) | `test_t1_trusted_when_given_cells_preserved_and_blanks_filled` | G1 `original`, 빈칸만 7·8 채운 `working` → `trusted`, `can_verify=True`, `violations=[]` |
+| **T-TRUST-02** | FR-TRUST-01,04,06 | RED (존재) | `test_t2_contaminated_when_given_cell_modified` | 주어진 칸 `(1,1)` 10→11 변경 → `contaminated`, `can_verify=False`, R1 at `(1,1)` |
+| **T-TRUST-03** | FR-TRUST-03 | RED (예정) | `test_t3_contaminated_when_value_out_of_range` | 빈칸 `(1,3)`에 `17` (또는 `-1`) 입력 → `contaminated`, `can_verify=False`, R3 at `(1,3)` |
+
+### `validate_lines` — T-VAL
+
+| Test ID | FR | 상태 | 테스트 함수 (예정) | Given → Then |
+|---------|-----|------|-------------------|--------------|
+| **T-VAL-01** | FR-VAL-02 | RED (예정) | `test_t_val_01_pass_when_all_lines_sum_34` | G1 완성 격자 → `pass`, `failed_lines=[]` |
+| **T-VAL-02** | FR-VAL-03 | RED (예정) | `test_t_val_02_fail_when_line_sum_not_34` | 완성 형태이나 한 선 합≠34 (예: `(1,1)` 10→9) → `fail`, 해당 선 ID in `failed_lines` |
+| **T-VAL-03** | FR-VAL-01 | RED (예정) | `test_t_val_03_incomplete_when_blank_remains` | G1 `original` (빈칸 2개) → `incomplete` |
+
+### `entity/` — D-LOC
+
+| Test ID | FR | 상태 | 테스트 함수 | Given → Then |
+|---------|-----|------|-------------|--------------|
+| **D-LOC-01** | FR-LOC-01 | RED (존재) | `test_d_loc_01_blank_coords_row_major` | G1 `grid_g1` → `[(2, 3), (4, 4)]` (1-index row-major) |
+
+### 파이프라인 연속성 (후속)
+
+| 시나리오 | 선행 | Given → Then |
+|----------|------|--------------|
+| Handoff → incomplete | T-TRUST-01 + T-VAL-03 | `trusted` + 빈칸 잔존 `working` → `validate_lines` → `incomplete` |
+| Handoff → pass | T-TRUST-01 + T-VAL-01 | `trusted` + G1 완성 `working` → `validate_lines` → `pass` |
+
+### RED 묶음 실행 순서
+
+1. **T-TRUST-01, 02** — 신뢰 관문 (세션 3 핵심)
+2. **D-LOC-01** — entity 독립 (src와 병렬 가능)
+3. **T-VAL-01~03** — `assess_partial_trust` GREEN 후
+4. **T-TRUST-03** — FR-TRUST-03 (R3 범위 위반) 완결
+
+---
+
 ## TDD
 
 **RED → GREEN → REFACTOR** (Dual-Track: Logic `entity/` · UI `boundary/`)
@@ -165,9 +207,10 @@ prompts/                    # 세션 프롬프트
 
 | API / Test ID | Phase | 상태 |
 |---------------|-------|------|
-| `D-LOC-01` / `find_blank_coords` | RED | 스켈레톤 |
+| `D-LOC-01` / `find_blank_coords` | RED | 테스트 존재 (`pytest.fail`), 미구현 |
 | `T-TRUST-01`, `T-TRUST-02` | RED | 테스트 존재, 미구현 |
-| `T-VAL-*` / `validate_lines` | Harness | 시그니처만 |
+| `T-TRUST-03` | RED (예정) | 테스트 미작성 — FR-TRUST-03 |
+| `T-VAL-01`~`T-VAL-03` / `validate_lines` | RED (예정) | Harness만, 테스트 미작성 |
 | `FR-CONST-01` / `constants.py` | GREEN | 완료 |
 
 ---
